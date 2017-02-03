@@ -1,0 +1,69 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <meta charset="utf-8" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+</head>
+
+<body>
+    <script>
+        function getSearchSuggestions() {
+            var _this = $(this);
+            var userData = $('[name=query]').val();
+            var obj = { input: userData };
+            console.log("input = " + userData);
+            if (userData == "") {
+                $("#suggestions").empty();
+            }
+            else {
+                $.ajax({
+                    type: "POST",
+                    url: "getQuerySuggestions.asmx/SearchTrie",
+                    data: JSON.stringify(obj),
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    success: function (msg) {
+                        $("#suggestions").empty();
+                        console.log(msg);
+                        var arr = msg.d;
+                        arr = arr.replace("[", "");
+                        arr = arr.replace("]", "");
+                        var data = arr.split(",");
+                        var suggestions = "";
+                        data.forEach(function (word) {
+                            word = word.replace("\"", "");
+                            word = word.replace("\"", "");
+                            $("<option/>").html(word).appendTo("#suggestions");
+                        });
+                        _this.focus();
+                    },
+                    error: function (msg) {
+                        console.log(msg);
+                    }
+                });
+            }
+        }
+    </script>
+    <div class="container">
+        <h1>
+            Search Query
+        </h1>
+        <form id="formoid">
+            <div>
+                <label class="title">Enter a search query: </label>
+                <input type="text" name="query" onkeyup="getSearchSuggestions()" id="userInput" list="suggestions"/>
+                <datalist id="suggestions">
+
+                </datalist>
+            </div>
+            <div>
+                <input type="submit" value="Submit" id="submit" />
+            </div>
+        </form>
+        <div id="jsonDiv">
+        </div>
+    </div>
+</body>
+</html>
